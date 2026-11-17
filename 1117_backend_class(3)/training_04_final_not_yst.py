@@ -61,14 +61,22 @@ class Employee:
         )
 # =====================================================================================
 class Department:
-    def __init__(self):
-        pass
-    def add_employee(self):
-        pass
+    def __init__(self, name, ):
+        self.name=name
+        self.employees=[]
+
+    def add_employee(self, employee):
+        self.employees.append(employee)
+        
     def get_payroll(self):
-        pass
+        total=0
+        for emp in self.employees:
+            total += emp.salary.get_total()
+        return total
+
     def get_avg_career(self):
         pass
+    
     def print_member(self):
         pass
 
