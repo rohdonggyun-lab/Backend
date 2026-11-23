@@ -23,7 +23,15 @@ class CommandClient:
     def connect(self) -> None:
         """[STEP 1] 소켓 생성 → connect → self.reader = LineReader(self.sock)"""
         # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-        raise NotImplementedError("STEP 1")
+        # raise NotImplementedError("STEP 1")
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            sock.connect((self.host, self.port))
+        except OSError:
+            sock.close()
+            raise
+        self.sock = sock
+        self.reader = LineReader(sock)
 
     def request(self, line: str) -> str | None:
         """
@@ -32,7 +40,11 @@ class CommandClient:
           return self.reader.read_line()
         """
         # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-        raise NotImplementedError("STEP 2")
+        # raise NotImplementedError("STEP 2")
+        if self.sock is None or self.reader is None:
+            raise RuntimeError("connect()를 먼저 호출해야 합니다.")
+        send_line(self.sock, line)
+        return self.reader.read_line()
 
     def close(self) -> None:
         if self.sock:
