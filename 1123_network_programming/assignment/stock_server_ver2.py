@@ -1,5 +1,3 @@
-# 문제 이해하는 중에 시간이 끝났습니다.
-
 """
 [실무 예제 2 · 기본] 물류센터 재고 조회 서버
 =====================================================================
@@ -60,7 +58,14 @@ class StockServer:
           "20" → 20,  "0" / "-3" / "abc" / "2.5" → ValueError("수량은 1 이상의 정수")
         """
         # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-        raise NotImplementedError("STEP 1: parse_qty")
+        # raise NotImplementedError("STEP 1: parse_qty")
+        try:
+            qty = int(text)
+        except ValueError as exc:
+            raise ValueError("수량은 1 이상의 정수여야 합니다") from exc
+        if qty < 1:
+            raise ValueError("수량은 1 이상의 정수여야 합니다")
+        return qty
 
     def warn(self, qty: int) -> str:
         """재고가 LOW_STOCK 이하이면 경고 문구를 돌려줍니다. (완성되어 있음)"""
@@ -87,7 +92,59 @@ class StockServer:
           ★ parse_qty 의 ValueError 는 잡아서 "ERR " + 메시지 로 응답합니다.
         """
         # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-        return "ERR 아직 구현되지 않았습니다"  # TODO: STEP 2
+        # return "ERR 아직 구현되지 않았습니다"  # TODO: STEP 2
+        parts = line.split()
+        if not parts:
+            return "ERR 빈 요청"
+
+        cmd = parts[0].upper()
+        if cmd == "STOCK":
+            if len(parts) != 2:
+                return "ERR 형식: STOCK 상품코드"
+            code = parts[1].upper()
+            item = self.inventory.get(code)
+            if item is None:
+                return f"ERR 없는 상품: {code}"
+            name, qty = item
+            return f"OK {code} {name} {qty}" + self.warn(qty)
+
+        if cmd in ("IN", "OUT"):
+            if len(parts) != 3:
+                return f"ERR 형식: {cmd} 상품코드 수량"
+            code = parts[1].upper()
+            try:
+                qty = self.parse_qty(parts[2])
+            except ValueError as exc:
+                return "ERR " + str(exc)
+            item = self.inventory.get(code)
+            if item is None:
+                return f"ERR 없는 상품: {code}"
+
+            old_qty = item[1]
+            if cmd == "IN":
+                new_qty = old_qty + qty
+            else:
+                if qty > old_qty:
+                    return f"ERR 재고 부족: {code} 현재 {old_qty}, 요청 {qty}"
+                new_qty = old_qty - qty
+            item[1] = new_qty
+            return f"OK {code} {old_qty} -> {new_qty}" + self.warn(new_qty)
+
+        if cmd == "LIST":
+            if len(parts) != 1:
+                return "ERR 형식: LIST"
+            stocks = ", ".join(
+                f"{code}={self.inventory[code][1]}"
+                for code in sorted(self.inventory)
+            )
+            return "OK " + stocks
+
+        if cmd == "QUIT":
+            if len(parts) != 1:
+                return "ERR 형식: QUIT"
+            return "OK BYE"
+
+        return f"ERR 알 수 없는 명령: {cmd}"
 
     # ---------------------------------------------------------------
     # 네트워크 부분
@@ -106,7 +163,18 @@ class StockServer:
         print(f"[접속] 단말기 {addr[0]}:{addr[1]}")
         with conn:
             # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-            raise NotImplementedError("STEP 3: read_line → handle_command → send_line 반복")
+            # raise NotImplementedError("STEP 3: read_line → handle_command → send_line 반복")
+            reader = LineReader(conn)
+            while True:
+                line = reader.read_line()
+                if line is None:
+                    break
+                reply = self.handle_command(line)
+                timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+                print(f"[{timestamp}] {addr[0]}:{addr[1]}  {line}  →  {reply}")
+                send_line(conn, reply)
+                if reply == "OK BYE":
+                    break
         print(f"[종료] 단말기 {addr[0]}:{addr[1]}")
 
     def serve_forever(self) -> None:
@@ -115,7 +183,18 @@ class StockServer:
           (2교시 Echo 서버와 같은 구조. 한 번에 단말기 1대씩 처리)
         """
         # ===== TODO: 이 부분을 완성하세요 (위 설명의 순서를 따라가세요) =====
-        raise NotImplementedError("STEP 4: 서버 소켓 준비와 accept 반복")
+        # raise NotImplementedError("STEP 4: 서버 소켓 준비와 accept 반복")
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server:
+            server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            server.bind((self.host, self.port))
+            server.listen()
+            print(f"[재고 서버] {self.host}:{self.port} 대기 중  (Ctrl+C 종료)")
+            try:
+                while True:
+                    conn, addr = server.accept()
+                    self.handle_client(conn, addr)
+            except KeyboardInterrupt:
+                print("\n[서버] 종료")
 
 
 if __name__ == "__main__":
