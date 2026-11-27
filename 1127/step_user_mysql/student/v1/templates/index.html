@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}회원 목록{% endblock %}
+
+{% block content %}
+<h2>회원 목록 ({{ users|length }}명)</h2>
+
+{% if users %}
+<table>
+  <tr><th>번호</th><th>이름</th><th>휴대폰</th><th>가입일</th></tr>
+  {% for user in users %}
+  <tr>
+    <td>{{ user.id }}</td>
+    <td><a href="/users/{{ user.id }}">{{ user.name }}</a></td>
+    <td>{{ user.phone }}</td>
+    <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+  </tr>
+  {% endfor %}
+</table>
+{% else %}
+<p>가입한 회원이 없습니다. <a href="/signup">회원가입</a>을 해 보세요.</p>
+{% endif %}
+{% endblock %}

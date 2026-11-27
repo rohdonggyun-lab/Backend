@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ user.name }} 님 정보{% endblock %}
+
+{% block content %}
+<h2>회원 정보</h2>
+<table>
+  <tr><th>번호</th><td>{{ user.id }}</td></tr>
+  <tr><th>이름</th><td>{{ user.name }}</td></tr>
+  <tr><th>휴대폰</th><td>{{ user.phone }}</td></tr>
+  <tr><th>가입일</th><td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td></tr>
+</table>
+
+{# HTML form은 PUT을 보낼 수 없으므로 POST + 별도 주소 사용 #}
+<form action="/users/{{ user.id }}/password" method="post">
+  <h3>비밀번호 수정</h3>
+  <label for="current_password">현재 비밀번호</label>
+  <input id="current_password" name="current_password" type="password" required>
+
+  <label for="new_password">새 비밀번호</label>
+  <input id="new_password" name="new_password" type="password" minlength="8" maxlength="20" required>
+  <span class="hint">8~20자</span>
+
+  <button type="submit">비밀번호 변경</button>
+</form>
+
+{# HTML form은 DELETE를 보낼 수 없으므로 POST + 별도 주소 사용 #}
+<form action="/users/{{ user.id }}/delete" method="post"
+      onsubmit="return confirm('정말 탈퇴하시겠습니까? 되돌릴 수 없습니다.');">
+  <h3>회원 탈퇴</h3>
+  <label for="del_password">비밀번호 확인</label>
+  <input id="del_password" name="password" type="password" required>
+  <button type="submit" class="btn-danger">회원 탈퇴</button>
+</form>
+{% endblock %}

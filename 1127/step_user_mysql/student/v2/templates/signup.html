@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}회원가입{% endblock %}
+
+{% block content %}
+<h2>회원가입</h2>
+
+{# action="/signup" method="post" → main.py의 @app.post("/signup")으로 전송 #}
+{# input의 name 속성 = 서버 함수의 Form 매개변수 이름 #}
+<form action="/signup" method="post">
+  <label for="name">이름</label>
+  <input id="name" name="name" value="{{ form.name or '' }}" maxlength="50" required>
+
+  <label for="phone">휴대폰 번호</label>
+  <input id="phone" name="phone" value="{{ form.phone or '' }}"
+         placeholder="010-1234-5678" pattern="010-[0-9]{4}-[0-9]{4}" required>
+  <span class="hint">010-1234-5678 형식 (하이픈 포함)</span>
+
+  <label for="password">비밀번호</label>
+  <input id="password" name="password" type="password" minlength="8" maxlength="20" required>
+  <span class="hint">8~20자</span>
+
+  <button type="submit">가입하기</button>
+</form>
+{% endblock %}

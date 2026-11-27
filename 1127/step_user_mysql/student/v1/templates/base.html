@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}회원 관리{% endblock %}</title>
+  <style>
+    body { font-family: "Malgun Gothic", sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #222; }
+    header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; padding-bottom: 8px; }
+    header a { text-decoration: none; color: #222; font-weight: bold; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f3f3f3; }
+    form { margin-top: 16px; padding: 16px; border: 1px solid #ddd; border-radius: 6px; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box; }
+    button { margin-top: 14px; padding: 8px 16px; cursor: pointer; }
+    .btn-danger { background: #d9534f; color: #fff; border: none; }
+    .msg { padding: 10px; margin-top: 16px; background: #e7f6e7; border: 1px solid #8c8; }
+    .error { padding: 10px; margin-top: 16px; background: #fde8e8; border: 1px solid #e99; }
+    .hint { color: #777; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/">회원 관리</a>
+    <a href="/signup">회원가입</a>
+  </header>
+
+  {# 성공 메시지 / 에러 메시지 공통 표시 #}
+  {% if msg %}<div class="msg">{{ msg }}</div>{% endif %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  {% block content %}{% endblock %}
+</body>
+</html>
